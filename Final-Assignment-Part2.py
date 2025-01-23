@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import dash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import pandas as pd
-import plotly.graph_objs as go
 import plotly.express as px
 
 # Load the data using pandas
@@ -19,9 +12,8 @@ data = pd.read_csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain
 app = dash.Dash(__name__)
 
 # Set the title of the dashboard
-#app.title = "Automobile Statistics Dashboard"
+app.title = "Automobile Statistics Dashboard"
 
-#---------------------------------------------------------------------------------
 # Create the dropdown menu options
 dropdown_options = [
     {'label': 'Yearly Statistics', 'value': 'Yearly Statistics'},
@@ -30,11 +22,9 @@ dropdown_options = [
 
 # List of years 
 year_list = [i for i in range(1980, 2024, 1)]
-#---------------------------------------------------------------------------------------
-# Create the layout of the app
-# Modify the layout part to structure graphs in two rows
 
-app.layout = html.Div([ 
+# Create the layout of the app
+app.layout = html.Div([
     # Title
     html.H1("Automobile Sales Statistics Dashboard", style={
         'font-size': 24,
@@ -61,19 +51,17 @@ app.layout = html.Div([
     )),
 
     # Output container
-    html.Div([ 
-        html.Div(id='output-container', className='chart-grid', style={'display': 'flex', 'flexWrap': 'wrap'}) 
-    ])
+    html.Div(id='output-container', className='chart-grid', style={'display': 'flex', 'flexWrap': 'wrap'})
 ])
 
 # Update the callback for displaying graphs in two rows
 @app.callback(
     Output(component_id='output-container', component_property='children'),
     [Input(component_id='statistics', component_property='value'),
-    Input(component_id='select-year', component_property='value')]
+     Input(component_id='select-year', component_property='value')]
 )
 def update_output_container(statistics, input_year):
-    if statistics == 'Recession Period Statistics':
+    if statistics == 'Recession Statistics':
         # Filter the data for recession periods
         recession_data = data[data['Recession'] == 1]
 
@@ -82,7 +70,7 @@ def update_output_container(statistics, input_year):
         R_chart1 = dcc.Graph(figure=px.line(yearly_rec, x='Year', y='Automobile_Sales', title="Average Automobile Sales fluctuation over Recession Period"))
 
         # Plot 2: Average sales for each vehicle type during recession
-        average_sales = recession_data.groupby('Vehicle_Type')['Automobile_Sales'].sum().reset_index()
+        average_sales = recession_data.groupby('Vehicle_Type')['Automobile_Sales'].mean().reset_index()
         R_chart2 = dcc.Graph(figure=px.bar(average_sales, x='Vehicle_Type', y='Automobile_Sales', title="Average sales for each vehicle type during recession"))
 
         # Plot 3: Total expenditure share by vehicle type during recessions
@@ -132,4 +120,3 @@ def update_output_container(statistics, input_year):
 # Run the Dash app
 if __name__ == '__main__':
     app.run_server(debug=True)
-
